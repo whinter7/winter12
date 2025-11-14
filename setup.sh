@@ -1,12 +1,16 @@
 #!/bin/bash
 
-# ===============================================
-# Termux Package Setup Script (Enhanced)
-# ===============================================
+# ==========================================================
+# Termux Setup Script (Fully Automatic & Error Tolerant)
+# Dibuat untuk mengatasi masalah konflik konfigurasi (dpkg)
+# ==========================================================
 
-echo "Memulai proses pembaruan dan instalasi paket Termux..."
+echo "Memulai proses instalasi Termux otomatis..."
 
-# Fungsi untuk memeriksa status perintah dan keluar jika gagal
+# Variabel untuk mengatur non-interaktif
+export DEBIAN_FRONTEND=noninteractive
+
+# --- Fungsi untuk memeriksa status ---
 check_status() {
     if [ $? -ne 0 ]; then
         echo -e "\n[!] ERROR: Perintah sebelumnya gagal. Menghentikan script."
@@ -14,33 +18,29 @@ check_status() {
     fi
 }
 
-# 1. Update list paket
-echo -e "\n--- [1/4] Melakukan pkg update ---"
-pkg update
-check_status
-
-# 2. Tangani konfigurasi paket yang tertunda (misalnya error 'apt' atau 'dpkg')
-echo -e "\n--- [2/4] Mencoba menyelesaikan konfigurasi paket yang gagal (dpkg) ---"
+# --- 1. Perbaikan dan Konfigurasi yang Gagal ---
+echo -e "\n--- [1/4] Mencoba menyelesaikan konfigurasi paket yang gagal (dpkg) ---"
 dpkg --configure -a
 
-# 3. Upgrade paket yang sudah terinstal
-# Menggunakan '|| true' agar script tidak langsung gagal jika upgrade memerlukan input,
-# tetapi juga akan dijalankan ulang (seperti di bawah).
-echo -e "\n--- [3/4] Melakukan pkg upgrade dengan -y (otomatis 'yes') ---"
-pkg upgrade -y
-
-# Jalankan update dan upgrade lagi untuk memastikan semua dependensi terinstal dengan baik
-# dan untuk menyelesaikan prompt yang mungkin terlewat.
-echo -e "\n--- Mengulang update dan upgrade untuk memastikan konsistensi sistem ---"
-pkg update && pkg upgrade -y
+# --- 2. Update dan Upgrade Sistem (Non-Interaktif) ---
+echo -e "\n--- [2/4] Melakukan pkg update dan upgrade (otomatis 'yes') ---"
+pkg update -y
 check_status
 
-# 4. Instalasi paket yang diminta
-echo -e "\n--- [4/4] Memasang paket Python, SQLite, Coreutils, dan Busybox ---"
+# Menggunakan DEBIAN_FRONTEND untuk menghindari prompt konflik konfigurasi (seperti bashrc)
+pkg upgrade -y
+check_status
+
+# --- 3. Instalasi Paket yang Diminta ---
+echo -e "\n--- [3/4] Memasang paket Python, SQLite, Coreutils, dan Busybox ---"
 pkg install python sqlite coreutils busybox -y
 check_status
 
+# --- 4. Pembersihan Akhir ---
+echo -e "\n--- [4/4] Membersihkan cache paket yang sudah tidak diperlukan ---"
+pkg autoclean
+
+# --- Selesai ---
 echo -e "\n============================================="
 echo "✅ Instalasi dan Pembaruan Termux Selesai!"
-echo "Semua paket yang diminta telah diinstal."
 echo "============================================="
