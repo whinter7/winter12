@@ -82,25 +82,6 @@ def download_wenco():
         print("[✗] Gagal download wenco.py")
         return False
 
-def run_wenco():
-    """Jalankan wenco.py"""
-    download_path = "/sdcard/Download/wenco.py"
-    
-    print("\n" + "="*50)
-    print("🚀 MENJALANKAN WENCO.PY")
-    print("="*50 + "\n")
-    
-    if not os.path.exists(download_path):
-        print(f"[✗] File tidak ditemukan: {download_path}")
-        return False
-    
-    print("[•] Memulai wenco.py...\n")
-    time.sleep(1)
-    
-    # Jalankan wenco.py
-    os.system(f"python {download_path}")
-    return True
-
 def main():
     banner()
     
@@ -135,40 +116,25 @@ def main():
     if not has_root:
         print("\n[⚠] PERINGATAN: Device tidak memiliki akses root!")
         print("    Inject cookie tidak akan berfungsi tanpa root.")
-        try:
-            response = input("\nLanjutkan download wenco.py? (y/n): ").strip().lower()
-            if response != 'y':
-                print("\n[•] Setup dibatalkan.")
-                sys.exit(0)
-        except (EOFError, KeyboardInterrupt):
-            print("\n[•] Setup dibatalkan.")
-            sys.exit(0)
+        print("    Tapi setup akan tetap dilanjutkan...\n")
+        time.sleep(2)
     
     print("\n[✓] Setup Termux selesai!")
     
     # Download wenco.py
     if download_wenco():
         print("\n" + "="*50)
-        try:
-            response = input("\nJalankan wenco.py sekarang? (y/n): ").strip().lower()
-        except (EOFError, KeyboardInterrupt):
-            print("\n[•] Melewati eksekusi wenco.py")
-            response = 'n'
-        
-        if response == 'y':
-            run_wenco()
-        else:
-            print("\n[•] Untuk menjalankan nanti, ketik:")
-            print("    python /sdcard/Download/wenco.py")
+        print("[✓] SETUP SELESAI!")
+        print("="*50)
+        print("\n📝 File wenco.py tersimpan di: /sdcard/Download/wenco.py")
+        print("\n🚀 Untuk menjalankan, ketik:")
+        print("   python /sdcard/Download/wenco.py")
+        print("\n💡 Atau buat alias:")
+        print("   echo \"alias wenco='python /sdcard/Download/wenco.py'\" >> ~/.bashrc")
+        print("   source ~/.bashrc\n")
     else:
         print("\n[✗] Setup selesai tapi wenco.py gagal didownload.")
         print("    Coba download manual atau cek koneksi internet.")
-    
-    print("\n" + "="*50)
-    print("[✓] SETUP SELESAI!")
-    print("="*50)
-    print("\n📝 File wenco.py tersimpan di: /sdcard/Download/wenco.py")
-    print("🔄 Untuk menjalankan lagi: python /sdcard/Download/wenco.py\n")
 
 if __name__ == "__main__":
     try:
