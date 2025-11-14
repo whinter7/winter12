@@ -135,8 +135,12 @@ def main():
     if not has_root:
         print("\n[⚠] PERINGATAN: Device tidak memiliki akses root!")
         print("    Inject cookie tidak akan berfungsi tanpa root.")
-        response = input("\nLanjutkan download wenco.py? (y/n): ").lower()
-        if response != 'y':
+        try:
+            response = input("\nLanjutkan download wenco.py? (y/n): ").strip().lower()
+            if response != 'y':
+                print("\n[•] Setup dibatalkan.")
+                sys.exit(0)
+        except (EOFError, KeyboardInterrupt):
             print("\n[•] Setup dibatalkan.")
             sys.exit(0)
     
@@ -145,7 +149,11 @@ def main():
     # Download wenco.py
     if download_wenco():
         print("\n" + "="*50)
-        response = input("\nJalankan wenco.py sekarang? (y/n): ").lower()
+        try:
+            response = input("\nJalankan wenco.py sekarang? (y/n): ").strip().lower()
+        except (EOFError, KeyboardInterrupt):
+            print("\n[•] Melewati eksekusi wenco.py")
+            response = 'n'
         
         if response == 'y':
             run_wenco()
