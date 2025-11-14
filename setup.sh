@@ -1,6 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/sh
 exec python "$0" "$@"
 
+# PYTHON START
 import os
 import shutil
 import sys
