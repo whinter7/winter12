@@ -1,33 +1,48 @@
-#!/bin/bash
+import os
+import shutil
 
-echo "[*] Memulai setup environment Termux untuk automasi Roblox..."
-cd $HOME
+def check_and_install(pkg):
+    print(f"[•] Mengecek {pkg}...")
+    if shutil.which(pkg) is None:
+        print(f"[!] {pkg} belum terinstall. Menginstall...")
+        os.system(f"pkg install -y {pkg}")
+    else:
+        print(f"[✓] {pkg} sudah terinstall.")
 
-# 🔄 Bersihkan storage lama jika ada
-if [ -e "$HOME/storage" ]; then
-    echo "[*] Menghapus storage lama..."
-    rm -rf "$HOME/storage"
-fi
+def check_su_access():
+    print("[•] Mengecek akses root...")
+    result = os.popen("su -c 'id'").read()
+    if "uid=0" in result:
+        print("[✓] Akses root tersedia.")
+    else:
+        print("[✗] Akses root TIDAK tersedia. Pastikan device sudah di-root dan Termux punya izin.")
 
-# 📂 Setup akses storage
-termux-setup-storage
+def check_sqlite3():
+    print("[•] Mengecek sqlite3...")
+    result = os.popen("sqlite3 --version").read()
+    if result.strip():
+        print(f"[✓] sqlite3 versi {result.strip()} tersedia.")
+    else:
+        print("[✗] sqlite3 tidak ditemukan. Coba install ulang dengan: pkg install sqlite")
 
-# 🔄 Update dan upgrade package
-yes | pkg update
-yes | pkg upgrade
+def check_python():
+    print("[•] Mengecek Python...")
+    result = os.popen("python --version").read()
+    if result.strip():
+        print(f"[✓] Python versi {result.strip()} tersedia.")
+    else:
+        print("[✗] Python tidak ditemukan. Coba install ulang dengan: pkg install python")
 
-# 🔁 Ganti repository agar lebih stabil (opsional)
-curl -s https://raw.githubusercontent.com/u400822/setup-termux/refs/heads/main/termux-change-repo.sh | bash
+def main():
+    print("=== 🔧 Setup & Validasi Termux untuk Inject Roblox Cookie ===\n")
+    check_and_install("python")
+    check_and_install("sqlite3")
+    check_and_install("coreutils")
+    check_and_install("busybox")
+    check_su_access()
+    check_sqlite3()
+    check_python()
+    print("\n[✓] Semua pengecekan selesai. Siap untuk inject!")
 
-# 🐍 Install Python dan pip
-yes | pkg install python
-yes | pkg install python-pip
-
-# 📦 Install library Python untuk automasi login
-pip install --upgrade pip
-pip install requests asyncio pyjwt prettytable pycryptodome psutil
-
-# 📥 Unduh skrip Python login Roblox dari GitHub kamu
-curl -Ls "https://raw.githubusercontent.com/USERNAME/REPO/BRANCH/login_roblox.py" -o /sdcard/Download/login_roblox.py
-
-echo "[✓] Setup selesai. Skrip Python disimpan di /sdcard/Download/login_roblox.py"
+if __name__ == "__main__":
+    main()
