@@ -1,5 +1,14 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"":"
+import os, shutil, sys
+python_exec = shutil.which("python") or shutil.which("python3")
+os.execvp(python_exec, ["python", sys.argv[0]])
+":\""
+
 import os
 import shutil
+import sys
 
 def check_and_install(pkg):
     print(f"[•] Mengecek {pkg}...")
@@ -15,7 +24,7 @@ def check_su_access():
     if "uid=0" in result:
         print("[✓] Akses root tersedia.")
     else:
-        print("[✗] Akses root TIDAK tersedia. Pastikan device sudah di-root dan Termux punya izin.")
+        print("[✗] Akses root TIDAK tersedia.")
 
 def check_sqlite3():
     print("[•] Mengecek sqlite3...")
@@ -23,7 +32,7 @@ def check_sqlite3():
     if result.strip():
         print(f"[✓] sqlite3 versi {result.strip()} tersedia.")
     else:
-        print("[✗] sqlite3 tidak ditemukan. Coba install ulang dengan: pkg install sqlite")
+        print("[✗] sqlite3 tidak ditemukan.")
 
 def check_python():
     print("[•] Mengecek Python...")
@@ -31,10 +40,10 @@ def check_python():
     if result.strip():
         print(f"[✓] Python versi {result.strip()} tersedia.")
     else:
-        print("[✗] Python tidak ditemukan. Coba install ulang dengan: pkg install python")
+        print("[✗] Python tidak ditemukan.")
 
 def main():
-    print("=== 🔧 Setup & Validasi Termux untuk Inject Roblox Cookie ===\n")
+    print("=== 🔧 Setup & Validasi Termux ===\n")
     check_and_install("python")
     check_and_install("sqlite3")
     check_and_install("coreutils")
@@ -42,7 +51,7 @@ def main():
     check_su_access()
     check_sqlite3()
     check_python()
-    print("\n[✓] Semua pengecekan selesai. Siap untuk inject!")
+    print("\n[✓] Selesai.")
 
 if __name__ == "__main__":
     main()
