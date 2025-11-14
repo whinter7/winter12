@@ -1,7 +1,6 @@
-#!/data/data/com.termux/files/usr/bin/sh
+#!/system/bin/sh
 exec python "$0" "$@"
 
-# PYTHON START
 import os
 import shutil
 import sys
@@ -39,7 +38,7 @@ def check_python():
         print("[✗] Python tidak ditemukan.")
 
 def main():
-    print("=== 🔧 Setup & Validasi Termux ===\n")
+    print("=== 🔧 Setup & Validasi Termux ===")
     check_and_install("python")
     check_and_install("sqlite3")
     check_and_install("coreutils")
@@ -47,7 +46,7 @@ def main():
     check_su_access()
     check_sqlite3()
     check_python()
-    print("\n[✓] Selesai.")
+    print("[✓] Selesai.")
 
 if __name__ == "__main__":
     main()
