@@ -1,10 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"":"
-import os, shutil, sys
-python_exec = shutil.which("python") or shutil.which("python3")
-os.execvp(python_exec, ["python", sys.argv[0]])
-":\""
+""":"
+python=$(command -v python || command -v python3)
+exec $python "$0"
+":"""
 
 import os
 import shutil
