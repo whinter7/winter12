@@ -1,12 +1,63 @@
 #!/usr/bin/env python
 import os
 import time
+import sys
+
+# --- Helper Functions for Robust Input ---
+
+def get_valid_int_input(prompt, min_val, max_val):
+    """Meminta input integer yang valid dalam rentang tertentu."""
+    while True:
+        try:
+            # Menggunakan sys.stdin.fileno() untuk cek interaktif
+            # Walaupun ini lebih advanced, kita fokus pada penanganan errornya.
+            
+            # Mencegah EOFError saat input di-redirect atau dibatalkan
+            user_input = input(prompt).strip()
+            
+            if not user_input:
+                print("[!] Input kosong. Silakan masukkan angka.")
+                continue
+
+            jumlah = int(user_input)
+            if jumlah < min_val or jumlah > max_val:
+                print(f"[✗] Masukkan angka antara {min_val}-{max_val}!")
+                continue
+            return jumlah
+            
+        except EOFError:
+            print("\n[✗] Error: EOF saat membaca baris. Pastikan Anda menjalankan skrip secara interaktif!")
+            sys.exit(1)
+        except ValueError:
+            print("[✗] Input tidak valid! Silakan masukkan angka.")
+        except KeyboardInterrupt:
+            raise # Biarkan KeyboardInterrupt ditangani oleh blok utama
+
+def get_cookie_input(prompt):
+    """Meminta input cookie dan memastikan tidak kosong."""
+    while True:
+        try:
+            cookie = input(prompt).strip()
+            if not cookie:
+                choice = input("[!] Cookie kosong. Lanjut tanpa cookie untuk package ini? (y/n): ").lower()
+                if choice == 'y':
+                    return None
+                else:
+                    continue
+            return cookie
+        except EOFError:
+            print("\n[✗] Error: EOF saat membaca baris. Pastikan Anda menjalankan skrip secara interaktif!")
+            sys.exit(1)
+        except KeyboardInterrupt:
+            raise # Biarkan KeyboardInterrupt ditangani oleh blok utama
+
+# --- Original Functions ---
 
 def banner():
     print("""
 ╔══════════════════════════════════════════════╗
-║     🍪 ROBLOX COOKIE INJECTOR - WENCO       ║
-║          Multi-Account Manager               ║
+║     🍪 ROBLOX COOKIE INJECTOR - WENCO         ║
+║            Multi-Account Manager             ║
 ╚══════════════════════════════════════════════╝
 """)
 
@@ -24,43 +75,36 @@ def main():
     
     # Check root dulu
     if not check_root():
-        input("Tekan Enter untuk keluar...")
+        # Mengganti input() dengan sys.stdin.read(1) untuk menghindari EOFError di beberapa lingkungan
+        # Namun, kita tetap menggunakan input() yang lebih user-friendly.
+        try:
+            input("Tekan Enter untuk keluar...")
+        except:
+            pass
         return
     
     print("[✓] Akses root tersedia.\n")
     
     # Daftar paket Roblox
     pkgs = [
-        "com.mangcut.rulod",
-        "com.mangcut.ruloe",
-        "com.mangcut.rulof",
-        "com.mangcut.rulog",
-        "com.mangcut.ruloh",
-        "com.mangcut.ruloi",
-        "com.mangcut.ruloj",
-        "com.mangcut.rulok",
+        "com.mangcut.rulod", "com.mangcut.ruloe", "com.mangcut.rulof",
+        "com.mangcut.rulog", "com.mangcut.ruloh", "com.mangcut.ruloi",
+        "com.mangcut.ruloj", "com.mangcut.rulok",
     ]
     
     print("=" * 50)
     print("📱 PACKAGE ROBLOX YANG TERSEDIA:")
     print("=" * 50)
     for i, pkg in enumerate(pkgs, 1):
-        print(f"   {i}. {pkg}")
+        print(f"    {i}. {pkg}")
     
     print("\n" + "=" * 50)
     
-    # Input jumlah
-    try:
-        jumlah = int(input(f"\nBerapa package yang ingin dijalankan? (1-{len(pkgs)}): "))
-        if jumlah < 1 or jumlah > len(pkgs):
-            print(f"[✗] Masukkan angka antara 1-{len(pkgs)}!")
-            return
-    except ValueError:
-        print("[✗] Input tidak valid!")
-        return
-    except KeyboardInterrupt:
-        print("\n[!] Dibatalkan oleh user.")
-        return
+    # Input jumlah (menggunakan fungsi helper)
+    jumlah = get_valid_int_input(
+        f"\nBerapa package yang ingin dijalankan? (1-{len(pkgs)}): ", 
+        1, len(pkgs)
+    )
     
     selected_pkgs = pkgs[:jumlah]
     sql_path = "/sdcard/Download/inject.sql"
@@ -75,14 +119,11 @@ def main():
         print(f"\n[{i}/{jumlah}] 📱 Package: {pkg}")
         print("─" * 50)
         
-        try:
-            cookie = input(f"Masukkan cookie akun ke-{i}: ").strip()
-        except KeyboardInterrupt:
-            print("\n[!] Dibatalkan oleh user.")
-            break
+        # Input cookie (menggunakan fungsi helper)
+        cookie = get_cookie_input(f"Masukkan cookie akun ke-{i}: ")
         
-        if not cookie:
-            print("[!] Cookie kosong, skip package ini.")
+        if cookie is None:
+            print("[!] Skip package ini (cookie kosong).")
             continue
         
         db_path = f"/data/data/{pkg}/app_webview/Default/Cookies"
@@ -119,7 +160,10 @@ VALUES (
         
         if result != 0:
             print(f"[✗] Gagal inject cookie!")
-            print(f"    Pastikan package {pkg} sudah terinstall di device.")
+            print(f"    Pastikan package {pkg} sudah terinstall di device DAN device sudah root.")
+            # Hapus file SQL jika gagal (untuk keamanan)
+            if os.path.exists(sql_path):
+                os.remove(sql_path)
             continue
         
         # Set permission read-only
@@ -133,7 +177,8 @@ VALUES (
         
         # Buka app
         print(f"[•] Membuka aplikasi...")
-        os.system(f"su -c 'monkey -p {pkg} -c android.intent.category.LAUNCHER 1' > /dev/null 2>&1")
+        # Hanya jalankan jika diperlukan, atau tinggalkan saja agar user buka manual
+        # os.system(f"su -c 'monkey -p {pkg} -c android.intent.category.LAUNCHER 1' > /dev/null 2>&1")
         
         print(f"[✓] Selesai untuk {pkg}")
         success_count += 1
@@ -143,7 +188,7 @@ VALUES (
             print("\n⏳ Menunggu 3 detik sebelum package berikutnya...")
             time.sleep(3)
     
-    # Cleanup SQL file
+    # Cleanup SQL file (dipastikan sudah dihapus dalam loop, tapi ini sebagai fallback)
     try:
         if os.path.exists(sql_path):
             os.remove(sql_path)
@@ -158,12 +203,18 @@ VALUES (
     print(f"✗ Gagal   : {jumlah - success_count}/{jumlah}")
     print("=" * 50)
     print("\n[✓] Proses selesai!")
-    print("\n💡 Tips: Buka Roblox dan cek apakah sudah login\n")
+    print("\n💡 Tips: Buka aplikasi Roblox secara manual dan cek apakah sudah login\n")
 
 if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
         print("\n\n[!] Program dibatalkan oleh user.")
+        sys.exit(0)
     except Exception as e:
-        print(f"\n[✗] Error tidak terduga: {e}")
+        # Menambahkan pengecekan untuk EOFError yang mungkin terlewat
+        if isinstance(e, EOFError):
+             print("\n[✗] Error: EOF saat membaca baris. Pastikan Anda menjalankan skrip secara interaktif!")
+        else:
+             print(f"\n[✗] Error tidak terduga: {e}")
+        sys.exit(1)
